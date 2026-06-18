@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뉴스위크 병원 평가 대시보드 — 서울아산병원</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --blue: #0057A8;
+    --blue-light: #3a7fcf;
+    --blue-pale: #e8f1fb;
+    --red: #c0392b;
+    --green: #1a7f4b;
+    --yellow: #f0a500;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --border: #e5e7eb;
+    --white: #ffffff;
+    --text: #111827;
+    --text-sub: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif; background: #f0f4f9; color: var(--text); font-size: 14px; }
+
+  /* ── Header ── */
+  .header { background: var(--blue); color: white; padding: 20px 32px 16px; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .header p { font-size: 12px; opacity: 0.75; margin-top: 4px; }
+
+  /* ── Tabs ── */
+  .tab-bar { display: flex; background: white; border-bottom: 2px solid var(--border); padding: 0 32px; gap: 2px; }
+  .tab-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--gray); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
+  .tab-btn:hover { color: var(--blue); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* ── Layout ── */
+  .content { padding: 24px 32px; max-width: 1300px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Cards ── */
+  .card { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 20px 24px; }
+  .card-title { font-size: 13px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card-title span { font-size: 16px; }
+
+  /* ── Grid ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .col-full { grid-column: 1 / -1; }
+
+  /* ── KPI ── */
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .kpi { flex: 1; min-width: 130px; background: white; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid var(--blue); }
+  .kpi.red { border-left-color: var(--red); }
+  .kpi.green { border-left-color: var(--green); }
+  .kpi.yellow { border-left-color: var(--yellow); }
+  .kpi-label { font-size: 11px; color: var(--text-sub); font-weight: 600; margin-bottom: 4px; }
+  .kpi-value { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+  .kpi-change { font-size: 12px; font-weight: 700; margin-top: 2px; }
+  .kpi-change.up { color: var(--red); }
+  .kpi-change.down { color: var(--green); }
+
+  /* ── Chart container ── */
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap.tall { height: 340px; }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--blue-pale); color: var(--blue); font-weight: 700; padding: 8px 12px; text-align: center; border: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 7px 12px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  td.hosp { text-align: left; font-weight: 600; }
+  td.asan { background: #fff3e0 !important; font-weight: 800; color: #c05000; }
+  td.rank1 { background: #fff8e1 !important; font-weight: 800; color: #b8860b; }
+  td.rank2 { background: #f0f8ff !important; color: var(--blue); font-weight: 700; }
+  td.na { color: #ccc; }
+
+  /* ── Toggle buttons ── */
+  .toggle-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .toggle-label { font-size: 12px; color: var(--text-sub); font-weight: 600; margin-right: 4px; }
+  .toggle-btn { padding: 5px 14px; border-radius: 20px; border: 2px solid; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .toggle-btn.active { color: white; }
+  .toggle-btn[data-hosp="asan"] { border-color: #e65c00; color: #e65c00; }
+  .toggle-btn[data-hosp="asan"].active { background: #e65c00; color: white; }
+  .toggle-btn[data-hosp="samsung"] { border-color: #1428a0; color: #1428a0; }
+  .toggle-btn[data-hosp="samsung"].active { background: #1428a0; color: white; }
+  .toggle-btn[data-hosp="severance"] { border-color: #006b3c; color: #006b3c; }
+  .toggle-btn[data-hosp="severance"].active { background: #006b3c; color: white; }
+  .toggle-btn[data-hosp="snuh"] { border-color: #6a0dad; color: #6a0dad; }
+  .toggle-btn[data-hosp="snuh"].active { background: #6a0dad; color: white; }
+  .toggle-btn[data-hosp="gangnam"] { border-color: #2e8b57; color: #2e8b57; }
+  .toggle-btn[data-hosp="gangnam"].active { background: #2e8b57; color: white; }
+
+  /* ── Notes ── */
+  .notes { margin-top: 10px; }
+  .note-item { background: var(--gray-light); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12.5px; border-left: 3px solid var(--blue); line-height: 1.6; }
+  .note-item strong { color: var(--blue); }
+  .note-item.warn { border-left-color: var(--red); }
+  .note-item.warn strong { color: var(--red); }
+  .note-item.good { border-left-color: var(--green); }
+  .note-item.good strong { color: var(--green); }
+
+  /* ── Cost table ── */
+  .cost-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .cost-badge.high { background: #fee2e2; color: #b91c1c; }
+  .cost-badge.mid { background: #fef3c7; color: #92400e; }
+  .cost-badge.none { background: #f3f4f6; color: #9ca3af; }
+
+  /* ── Specialty badge ── */
+  .spec { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; margin: 1px; }
+  .spec.s1 { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+  .spec.s2 { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+  .spec.s3 { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .spec.other { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+
+  /* ── Section heading ── */
+  .section-head { font-size: 15px; font-weight: 800; color: var(--blue); margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+  .section-head::before { content: ''; display: block; width: 4px; height: 18px; background: var(--blue); border-radius: 2px; }
+
+  /* ── Year badge ── */
+  .year-badge { display: inline-block; padding: 1px 8px; background: var(--blue); color: white; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 6px; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* ── No data ── */
+  .no-data { color: #9ca3af; font-size: 12px; }
+
+  /* ── Footnote ── */
+  .footnote { font-size: 11px; color: var(--text-sub); margin-top: 8px; line-height: 1.6; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+    .tab-bar { padding: 0 12px; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 뉴스위크 병원 평가 대시보드 — 서울아산병원</h1>
+  <p>Newsweek × Statista | World's Best Hospitals · Asia-Pacific Specialized · World Specialized · 홍보 비용 현황</p>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('wbh')">① 세계 종합순위 (WBH)</button>
+  <button class="tab-btn" onclick="showTab('bshap')">② 아태 임상분야별 (BSHAP)</button>
+  <button class="tab-btn" onclick="showTab('bsh')">③ 세계 임상분야별 (BSH)</button>
+  <button class="tab-btn" onclick="showTab('cost')">④ 비용 · 로고 현황</button>
+</div>
+
+<!-- ========== ① WBH ========== -->
+<div id="tab-wbh" class="tab-panel active">
+<div class="content">
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi red">
+      <div class="kpi-label">2026 세계 순위</div>
+      <div class="kpi-value">28위</div>
+      <div class="kpi-change up">▲ 3 ('25 25위)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 국내 순위</div>
+      <div class="kpi-value">2위</div>
+      <div class="kpi-change up">▲ 1 (전년 국내 1위)</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">역대 최고 세계 순위</div>
+      <div class="kpi-value">22위</div>
+      <div class="kpi-sub">2024년 3월 발표</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">연속 국내 1위 (2019-2025)</div>
+      <div class="kpi-value">7년</div>
+      <div class="kpi-sub">2026년 국내 2위로 변동</div>
+    </div>
+  </div>
+
+  <!-- Chart + Competitor Toggle -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title"><span>📈</span> 세계 종합순위 추이 (낮을수록 우수)</div>
+    <div class="toggle-group">
+      <span class="toggle-label">병원 표시:</span>
+      <button class="toggle-btn active" data-hosp="asan" onclick="toggleHosp('wbh','asan',this)">서울아산병원</button>
+      <button class="toggle-btn" data-hosp="samsung" onclick="toggleHosp('wbh','samsung',this)">삼성서울병원</button>
+      <button class="toggle-btn" data-hosp="severance" onclick="toggleHosp('wbh','severance',this)">세브란스병원</button>
+      <button class="toggle-btn" data-hosp="snuh" onclick="toggleHosp('wbh','snuh',this)">서울대병원</button>
+    </div>
+    <div class="chart-wrap tall"><canvas id="chartWbhTrend"></canvas></div>
+    <p class="footnote">※ 2019년은 세계 10위 이하 순위 미공개 | 타 병원 순위는 공개 보고서 기준이며 일부 추정치 포함 | 순위 역방향(낮을수록 우수)</p>
+  </div>
+
+  <div class="grid2">
+    <!-- 연도별 데이터 테이블 -->
+    <div class="card">
+      <div class="card-title"><span>📋</span> 연도별 순위 상세</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>회차</th><th>발표년월</th><th>세계순위</th><th>국내순위</th><th>비고</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>8</td><td>2026.02</td><td class="asan">28위</td><td class="asan">2위</td><td>국내 1위 → 삼성</td></tr>
+            <tr><td>7</td><td>2025.02</td><td class="asan">25위</td><td class="asan">1위</td><td></td></tr>
+            <tr><td>6</td><td>2024.03</td><td class="rank1">22위</td><td class="asan">1위</td><td>역대 최고</td></tr>
+            <tr><td>5</td><td>2023.03</td><td class="asan">29위</td><td class="asan">1위</td><td></td></tr>
+            <tr><td>4</td><td>2022.03</td><td class="asan">30위</td><td class="asan">1위</td><td></td></tr>
+            <tr><td>3</td><td>2021.03</td><td class="asan">34위</td><td class="asan">1위</td><td>세계 200대 공개</td></tr>
+            <tr><td>2</td><td>2020.03</td><td class="asan">37위</td><td class="asan">1위</td><td>세계 100대 공개</td></tr>
+            <tr><td>1</td><td>2019.03</td><td class="na">-</td><td class="asan">1위</td><td>세계 10위 이하 미공개</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 주요 변화 & 내용 -->
+    <div class="card">
+      <div class="card-title"><span>🔍</span> 주요 변화 · 이슈</div>
+      <div class="notes">
+        <div class="note-item warn">
+          <strong>⚠ 2026 국내 1위 → 2위 하락</strong><br>
+          삼성서울병원이 국내 1위, 아산병원은 세계 28위로 전년(25위) 대비 3계단 하락. 2026 로고 미구입.
+        </div>
+        <div class="note-item good">
+          <strong>✅ 2024 역대 최고 세계 22위</strong><br>
+          6년 연속 국내 1위이자 세계 22위 달성. 얼리버드 15% 할인 적용 18,195천원으로 로고 구입.
+        </div>
+        <div class="note-item">
+          <strong>📌 평가 방식 변화 (2026)</strong><br>
+          의료 종사자 추천 40%, 의료 성과 지표 35%, 환자 만족도 18.5%, PROMs 6.5% (10만 명 설문, 32개국).
+        </div>
+        <div class="note-item">
+          <strong>📌 PROMs 도입 강화</strong><br>
+          2022년 2.5% → 2026년 6.5%로 비중 증가. 환자자기평가도구(PROMs) 시행 적극 대응 필요.
+        </div>
+        <div class="note-item">
+          <strong>📌 국내 가중치 지속 감소</strong><br>
+          2019년 50% → 2026년 35%. 해외 의료진 추천 확대 전략 병행 필요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ========== ② BSHAP ========== -->
+<div id="tab-bshap" class="tab-panel">
+<div class="content">
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi green">
+      <div class="kpi-label">2026 아태 1위 분야 수</div>
+      <div class="kpi-value">5개</div>
+      <div class="kpi-sub">심장·내분비·정형·신경·심장수술</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 평가 분야 수</div>
+      <div class="kpi-value">10개</div>
+      <div class="kpi-sub">소화기 신규 추가</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">심장 아태 1위 연속</div>
+      <div class="kpi-value">4년↑</div>
+      <div class="kpi-sub">2023~2026 연속</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">2026 신경수술</div>
+      <div class="kpi-value">12위</div>
+      <div class="kpi-change up">▲ 1 ('25 11위)</div>
+    </div>
+  </div>
+
+  <!-- 분야 선택 & 차트 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title"><span>📈</span> 임상분야별 아태 순위 추이 (낮을수록 우수)</div>
+    <div class="toggle-group">
+      <span class="toggle-label">병원:</span>
+      <button class="toggle-btn active" data-hosp="asan" onclick="toggleHosp('bshap','asan',this)">서울아산병원</button>
+      <button class="toggle-btn" data-hosp="samsung" onclick="toggleHosp('bshap','samsung',this)">삼성서울병원</button>
+      <button class="toggle-btn" data-hosp="severance" onclick="toggleHosp('bshap','severance',this)">세브란스병원</button>
+      <button class="toggle-btn" data-hosp="snuh" onclick="toggleHosp('bshap','snuh',this)">서울대병원</button>
+      <button class="toggle-btn" data-hosp="gangnam" onclick="toggleHosp('bshap','gangnam',this)">강남세브란스</button>
+    </div>
+    <div style="margin-bottom:10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+      <span class="toggle-label">분야 선택:</span>
+      <select id="bshapSpecSelect" onchange="updateBshapChart()" style="padding:4px 10px; border-radius:6px; border:1px solid #ccc; font-size:12px;">
+        <option value="심장">심장</option>
+        <option value="내분비">내분비</option>
+        <option value="정형">정형외과</option>
+        <option value="신경">신경과</option>
+        <option value="심장수술">심장수술</option>
+        <option value="암">암</option>
+        <option value="호흡기">호흡기</option>
+        <option value="소화기">소화기</option>
+        <option value="소아">소아</option>
+        <option value="신경수술">신경수술</option>
+      </select>
+    </div>
+    <div class="chart-wrap tall"><canvas id="chartBshapSpec"></canvas></div>
+    <p class="footnote">※ 타 병원 데이터는 각 연도 보고서 및 발표자료 기준 | '-' 표시는 해당 연도 미평가 또는 미공개</p>
+  </div>
+
+  <!-- 전체 순위 테이블 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title"><span>📋</span> 아태 순위 전체 현황 (서울아산병원)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>연도</th><th>발표</th><th>심장</th><th>내분비</th><th>정형</th><th>신경</th><th>심장수술</th><th>암</th><th>호흡기</th><th>소화기</th><th>소아</th><th>신경수술</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2026</strong></td><td>6월</td>
+            <td class="rank1">1</td><td class="rank1">1</td><td class="rank1">1</td><td class="rank1">1</td><td class="rank1">1</td>
+            <td class="rank2">2</td><td class="rank2">2</td><td class="rank2">2</td><td>5</td><td>12</td>
+          </tr>
+          <tr>
+            <td><strong>2025</strong></td><td>6월</td>
+            <td class="rank1">1</td><td class="rank1">1</td><td class="rank1">1</td><td class="rank2">2</td><td class="rank2">2</td>
+            <td class="rank2">2</td><td class="rank2">2</td><td class="na">-</td><td>3</td><td>11</td>
+          </tr>
+          <tr>
+            <td><strong>2024</strong></td><td>6월</td>
+            <td class="rank1">1</td><td class="rank1">1</td><td class="rank2">2</td><td class="rank2">2</td><td>3</td>
+            <td class="rank2">2</td><td class="rank2">2</td><td class="na">-</td><td>5</td><td>16</td>
+          </tr>
+          <tr>
+            <td><strong>2023</strong></td><td>6월</td>
+            <td class="rank1">1</td><td class="rank1">1</td><td class="rank2">2</td><td>3</td><td class="na">-</td>
+            <td class="rank1">1</td><td class="na">-</td><td class="na">-</td><td>7</td><td class="na">-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">🟡 1위 · 🔵 2위 | 소화기 분야는 2026년 신규 추가 | 심장수술·신경수술·호흡기는 2024년부터 추가</p>
+  </div>
+
+  <!-- 타 병원 국내 비교 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title"><span>🏥</span> 국내 주요 병원 아태 순위 비교 (2026)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>분야</th><th>서울아산</th><th>삼성서울</th><th>세브란스</th><th>서울대</th><th>강남세브</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="hosp">심장</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">내분비</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">정형외과</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">신경과</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">심장수술</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">암</td><td class="rank2">2</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">호흡기</td><td class="rank2">2</td><td class="rank1">1</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">소화기</td><td class="rank2">2</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td class="hosp">소아</td><td>5</td><td>-</td><td>-</td><td class="rank1">1</td><td>-</td></tr>
+          <tr><td class="hosp">신경수술</td><td>12</td><td>-</td><td>-</td><td>-</td><td class="na">-</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">※ 2026 BSHAP 발표 기준 | 전체 순위표 미공개 분야는 '-' 표시 | 타 병원 국내 순위는 각 보고서 기재 내용 기반</p>
+  </div>
+
+  <!-- 주요 변화 -->
+  <div class="card">
+    <div class="card-title"><span>🔍</span> 주요 변화 · 이슈</div>
+    <div class="notes">
+      <div class="note-item good">
+        <strong>✅ 2026 심장·내분비·정형·신경·심장수술 아태 1위</strong><br>
+        5개 분야 아태 1위로 전년(3개) 대비 2개 증가. 신경 분야는 2위→1위 상승, 심장수술도 2위→1위 상승.
+      </div>
+      <div class="note-item good">
+        <strong>✅ 심장 분야 4년 연속(2023~2026) 아태 1위</strong><br>
+        내분비도 4년 연속 1위. 2027년 보도자료 발표 시 '5년 연속 아태 1위' 야마 활용 가능성 검토 필요.
+      </div>
+      <div class="note-item">
+        <strong>📌 소화기 분야 2026년 신규 추가 — 즉시 아태 2위</strong><br>
+        2026 BSHAP에 소화기 분야 신설(10개국 평가), 첫 참여에서 아태 2위 · 국내 2위 기록.
+      </div>
+      <div class="note-item warn">
+        <strong>⚠ 암·소아 분야 경쟁 심화</strong><br>
+        암: 삼성이 2024·2025·2026 연속 1위. 소아: 서울대가 연속 1위. 신경수술: 세브란스 1위.
+      </div>
+      <div class="note-item warn">
+        <strong>⚠ 삼성의 적극적 홍보 전략</strong><br>
+        삼성이 암 분야 특집기사(10페이지) 준비, 발표 전날 기자 사전 배포. 우리도 심장 '5년 연속 1위' 선제 전략 검토 권고.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ========== ③ BSH (세계 임상분야별) ========== -->
+<div id="tab-bsh" class="tab-panel">
+<div class="content">
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi green">
+      <div class="kpi-label">2026 세계 TOP10 분야</div>
+      <div class="kpi-value">6개</div>
+      <div class="kpi-sub">국내 최다 (보도자료)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2025 글로벌 TOP5 분야</div>
+      <div class="kpi-value">4개</div>
+      <div class="kpi-sub">내분비·소화기·암·비뇨기</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">2023 세계 10위권</div>
+      <div class="kpi-value">5개</div>
+      <div class="kpi-sub">심장·암·내분비 등</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">발표 시기</div>
+      <div class="kpi-value">9월</div>
+      <div class="kpi-sub">매년 9월 발표</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title"><span>📋</span> 세계 임상분야별 순위 현황 (서울아산병원)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>연도</th><th>발표</th><th>심장</th><th>내분비</th><th>암</th><th>신경</th><th>정형</th><th>소화기</th><th>비뇨기</th><th>소아</th><th>호흡기</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2026</strong></td><td>9월</td>
+            <td class="rank1">TOP10</td><td class="rank1">TOP10</td><td class="rank1">TOP10</td>
+            <td class="rank1">TOP10</td><td class="rank1">TOP10</td><td class="rank1">TOP10</td>
+            <td class="na">-</td><td class="na">-</td><td class="na">-</td>
+            <td><span class="spec s1">국내 최다 6개</span></td>
+          </tr>
+          <tr>
+            <td><strong>2025</strong></td><td>9월</td>
+            <td class="na">-</td><td class="rank1">TOP5</td><td class="rank1">TOP5</td>
+            <td class="na">-</td><td class="na">-</td><td class="rank1">TOP5</td>
+            <td class="rank1">TOP5</td><td class="na">-</td><td class="na">-</td>
+            <td><span class="spec s2">글로벌 TOP5 4개</span></td>
+          </tr>
+          <tr>
+            <td><strong>2023</strong></td><td>9월</td>
+            <td class="rank1">TOP10</td><td class="rank1">TOP10</td><td class="rank1">TOP10</td>
+            <td class="rank1">TOP10</td><td class="rank1">TOP10</td>
+            <td class="na">-</td><td class="na">-</td><td class="na">-</td><td class="na">-</td>
+            <td><span class="spec s2">5개 세계 10위권</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">※ BSH(세계 임상분야별)는 보도자료 기준 요약 | 정확한 순위 숫자는 각 연도 보고서 HWP 파일 참조 | '-'은 미발표 또는 10위권 외</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title"><span>📅</span> BSH 평가 연혁</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>연도</th><th>발표</th><th>평가 국가/병원</th><th>주요 내용</th></tr></thead>
+          <tbody>
+            <tr><td>2026</td><td>9월</td><td>세계 250대</td><td>6개 분야 세계 TOP10 — 국내 최다</td></tr>
+            <tr><td>2025</td><td>9월</td><td>세계 250대</td><td>내분비·소화기·암·비뇨기 글로벌 TOP5</td></tr>
+            <tr><td>2024</td><td>9월</td><td>세계 250대</td><td>HWP 파일 상세 내용 참조</td></tr>
+            <tr><td>2023</td><td>9월</td><td>세계 250대</td><td>5개 분야 세계 10위권</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🔍</span> 주요 변화 · 이슈</div>
+      <div class="notes">
+        <div class="note-item good">
+          <strong>✅ 2026 세계 TOP10 6개 — 국내 최다</strong><br>
+          심장·내분비·암·신경·정형·소화기 6개 분야 세계 10위권. 국내 병원 중 가장 많은 분야.
+        </div>
+        <div class="note-item good">
+          <strong>✅ 2025 내분비·소화기·암·비뇨기 글로벌 TOP5</strong><br>
+          4개 분야 세계 TOP5 진입. 소화기·비뇨기 분야 글로벌 경쟁력 입증.
+        </div>
+        <div class="note-item">
+          <strong>📌 세계 임상분야별 평가 시기</strong><br>
+          매년 9월 발표 (세계 종합 3월, 아태 임상 6월과 구분). 9월 보도자료 배포 전략 수립 필요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ========== ④ 비용 ========== -->
+<div id="tab-cost" class="tab-panel">
+<div class="content">
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">2026 WBH 로고 비용</div>
+      <div class="kpi-value" style="font-size:18px;">미구입</div>
+      <div class="kpi-sub">국내 2위 하락으로 미신청</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">2026 BSHAP 로고 비용</div>
+      <div class="kpi-value" style="font-size:18px;">4,214만원</div>
+      <div class="kpi-sub">5개 분야 실버 패키지</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">누적 총 투자액 (추정)</div>
+      <div class="kpi-value" style="font-size:18px;">약 2억원</div>
+      <div class="kpi-sub">WBH+BSHAP 전체</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">USD 단가 추이</div>
+      <div class="kpi-value" style="font-size:18px;">↑ 상승</div>
+      <div class="kpi-sub">12,950 → 16,500 USD</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <!-- WBH 비용 -->
+    <div class="card">
+      <div class="card-title"><span>💰</span> WBH (세계 종합) 로고 비용 내역</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>연도</th><th>발표</th><th>원화 (천원)</th><th>USD</th><th>비고</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>2026</strong></td><td>2월</td>
+              <td><span class="cost-badge none">미구입</span></td>
+              <td><span class="cost-badge none">-</span></td>
+              <td>국내 2위 하락</td></tr>
+            <tr><td><strong>2025</strong></td><td>2월</td>
+              <td><span class="cost-badge high">20,038</span></td>
+              <td>14,025</td>
+              <td>16,500 USD × 얼리버드 15%<br><small style="color:#999">병원명 미기입</small></td></tr>
+            <tr><td><strong>2024</strong></td><td>3월</td>
+              <td><span class="cost-badge high">18,195</span></td>
+              <td>13,600</td>
+              <td>16,000 USD × 얼리버드 15%</td></tr>
+            <tr><td><strong>2023</strong></td><td>3월</td>
+              <td><span class="cost-badge mid">17,993</span></td>
+              <td>13,500</td>
+              <td>15,000 USD × 얼리버드 10%</td></tr>
+            <tr><td><strong>2022</strong></td><td>3월</td>
+              <td><span class="cost-badge mid">17,944</span></td>
+              <td>14,500</td>
+              <td></td></tr>
+            <tr><td><strong>2021</strong></td><td>3월</td>
+              <td><span class="cost-badge mid">15,607</span></td>
+              <td>13,500</td>
+              <td></td></tr>
+            <tr><td><strong>2020</strong></td><td>3월</td>
+              <td><span class="cost-badge mid">16,268</span></td>
+              <td>13,000</td>
+              <td></td></tr>
+            <tr><td><strong>2019</strong></td><td>3월</td>
+              <td><span class="cost-badge mid">15,382</span></td>
+              <td>12,950</td>
+              <td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">※ 매년 실버 등급 라이선스 신청 — 홈페이지, 공식 문서, 인쇄용·디지털 전광판 등에 뉴스위크 로고 사용</p>
+    </div>
+
+    <!-- BSHAP 비용 -->
+    <div class="card">
+      <div class="card-title"><span>💰</span> BSHAP (아태 임상분야별) 로고 비용 내역</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>연도</th><th>발표</th><th>구입 분야</th><th>원화 (천원)</th><th>USD</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>2026</strong></td><td>6월</td>
+              <td>심장·내분비·정형·신경·심장수술 (5개)</td>
+              <td><span class="cost-badge high">42,140</span></td>
+              <td>27,600<br><small style="color:#999">9,200 × 5 × 40% 할인</small></td>
+            </tr>
+            <tr>
+              <td><strong>2025</strong></td><td>6월</td>
+              <td>심장·내분비·정형 (3개)</td>
+              <td><span class="cost-badge high">24,620</span></td>
+              <td>18,000<br><small style="color:#999">8,000 × 3 × 25% 할인</small></td>
+            </tr>
+            <tr>
+              <td><strong>2024</strong></td><td>6월</td>
+              <td>-</td>
+              <td><span class="cost-badge none">미구입</span></td>
+              <td>개당 7,000 USD</td>
+            </tr>
+            <tr>
+              <td><strong>2023</strong></td><td>6월</td>
+              <td>암·심장·내분비 (3개)</td>
+              <td><span class="cost-badge mid">20,480</span></td>
+              <td>15,750<br><small style="color:#999">7,000 × 3 × 25% 할인</small></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">※ 매년 실버 등급 | 3개 이상 구입 시 25% 할인, 5개 이상 40% 할인 | 2026 예산: 242,000천원, 기집행 44,000천원, 소요 42,140천원</p>
+    </div>
+  </div>
+
+  <!-- 비용 차트 -->
+  <div class="card">
+    <div class="card-title"><span>📊</span> WBH 로고 비용 추이 (천원)</div>
+    <div class="chart-wrap"><canvas id="chartCost"></canvas></div>
+  </div>
+
+  <!-- 할인 구조 -->
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title"><span>ℹ️</span> 할인 구조 · 구매 팁</div>
+    <div class="notes">
+      <div class="note-item good">
+        <strong>✅ BSHAP 대량 할인: 5개 이상 구입 시 40% 할인</strong><br>
+        2026년 5개 구입으로 40% 할인 적용 (27,600 USD). 분야 수 증가 시 추가 절감 가능.
+      </div>
+      <div class="note-item">
+        <strong>📌 WBH 얼리버드 할인: 10~15%</strong><br>
+        2023년 10%, 2024~2025년 15% 할인. 조기 신청이 비용 절감에 유리.
+      </div>
+      <div class="note-item warn">
+        <strong>⚠ 2025 WBH 병원명 미기입</strong><br>
+        커스터마이징(병원명 기입) 신청을 하지 않아 로고에 병원명 미표시. 향후 신청 시 커스터마이징 포함 검토 필요.
+      </div>
+      <div class="note-item warn">
+        <strong>⚠ USD 단가 매년 상승 추세</strong><br>
+        WBH: 12,950 USD(2019) → 16,500 USD(2025). BSHAP: 7,000(2023) → 9,200 USD(2026). 환율 영향도 고려 필요 (2026년 1,526.70원/USD).
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── 데이터 ──────────────────────────────────────────────────
+const WBH_YEARS = ['2019','2020','2021','2022','2023','2024','2025','2026'];
+
+const WBH_DATA = {
+  asan:     { label:'서울아산병원', color:'#e65c00', data:[null,37,34,30,29,22,25,28] },
+  samsung:  { label:'삼성서울병원', color:'#1428a0', data:[null,null,null,null,null,null,null,null] },
+  severance:{ label:'세브란스병원', color:'#006b3c', data:[null,null,null,null,null,null,null,null] },
+  snuh:     { label:'서울대병원',   color:'#6a0dad', data:[null,null,null,null,null,null,null,null] },
+};
+
+const BSHAP_YEARS = ['2023','2024','2025','2026'];
+const BSHAP_SPECS = ['심장','내분비','정형','신경','심장수술','암','호흡기','소화기','소아','신경수술'];
+
+const BSHAP_DATA = {
+  asan: {
+    label:'서울아산병원', color:'#e65c00',
+    심장:     [1,1,1,1],
+    내분비:   [1,1,1,1],
+    정형:     [2,2,1,1],
+    신경:     [3,2,2,1],
+    심장수술: [null,3,2,1],
+    암:       [1,2,2,2],
+    호흡기:   [null,2,2,2],
+    소화기:   [null,null,null,2],
+    소아:     [7,5,3,5],
+    신경수술: [null,16,11,12],
+  },
+  samsung: {
+    label:'삼성서울병원', color:'#1428a0',
+    심장:     [null,null,null,null],
+    내분비:   [null,null,null,null],
+    정형:     [null,null,null,null],
+    신경:     [null,null,null,null],
+    심장수술: [null,null,null,null],
+    암:       [null,1,1,1],
+    호흡기:   [null,1,1,1],
+    소화기:   [null,null,null,null],
+    소아:     [null,null,null,null],
+    신경수술: [null,null,null,null],
+  },
+  severance: {
+    label:'세브란스병원', color:'#006b3c',
+    심장:     [null,null,null,null],
+    내분비:   [null,null,null,null],
+    정형:     [1,1,null,null],
+    신경:     [null,null,null,null],
+    심장수술: [null,null,null,null],
+    암:       [null,null,null,null],
+    호흡기:   [null,null,null,null],
+    소화기:   [null,null,null,null],
+    소아:     [null,null,null,null],
+    신경수술: [null,1,1,null],
+  },
+  snuh: {
+    label:'서울대병원', color:'#6a0dad',
+    심장:     [null,null,null,null],
+    내분비:   [null,null,null,null],
+    정형:     [null,null,null,null],
+    신경:     [null,null,null,null],
+    심장수술: [null,null,null,null],
+    암:       [null,null,null,null],
+    호흡기:   [null,null,null,null],
+    소화기:   [null,null,null,null],
+    소아:     [1,1,1,null],
+    신경수술: [null,null,null,null],
+  },
+  gangnam: {
+    label:'강남세브란스', color:'#2e8b57',
+    심장:     [null,null,null,null],
+    내분비:   [null,null,null,null],
+    정형:     [null,null,null,null],
+    신경:     [null,null,null,null],
+    심장수술: [null,null,null,null],
+    암:       [null,null,null,null],
+    호흡기:   [null,null,null,null],
+    소화기:   [null,null,null,null],
+    소아:     [null,null,null,null],
+    신경수술: [null,2,null,null],
+  },
+};
+
+const COST_YEARS = ['2019','2020','2021','2022','2023','2024','2025'];
+const COST_WBH   = [15382,16268,15607,17944,17993,18195,20038];
+
+// ── 표시 상태 ──────────────────────────────────────────────
+const visibility = {
+  wbh:   { asan:true, samsung:false, severance:false, snuh:false },
+  bshap: { asan:true, samsung:false, severance:false, snuh:false, gangnam:false },
+};
+
+// ── 차트 인스턴스 ─────────────────────────────────────────
+let chartWbh = null, chartBshap = null, chartCostInst = null;
+
+function makeDataset(hosp, data, visible) {
+  return {
+    label: data.label,
+    data: data.data,
+    borderColor: data.color,
+    backgroundColor: data.color + '20',
+    pointBackgroundColor: data.color,
+    pointRadius: 5,
+    pointHoverRadius: 7,
+    tension: 0.3,
+    spanGaps: true,
+    hidden: !visible,
+  };
+}
+
+// ── WBH 차트 ──────────────────────────────────────────────
+function initWbhChart() {
+  const ctx = document.getElementById('chartWbhTrend').getContext('2d');
+  const datasets = Object.entries(WBH_DATA).map(([k,v]) =>
+    makeDataset(k, v, visibility.wbh[k])
+  );
+  chartWbh = new Chart(ctx, {
+    type: 'line',
+    data: { labels: WBH_YEARS, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: {
+          reverse: true,
+          min: 1, max: 45,
+          title: { display: true, text: '세계 순위 (낮을수록 우수)', font:{size:11} },
+          ticks: { stepSize: 5 }
+        },
+        x: { title: { display: true, text: '발표 연도' } }
+      },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.raw ? `${ctx.dataset.label}: 세계 ${ctx.raw}위` : `${ctx.dataset.label}: 미공개`
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── BSHAP 차트 ─────────────────────────────────────────────
+function initBshapChart() {
+  const ctx = document.getElementById('chartBshapSpec').getContext('2d');
+  const spec = document.getElementById('bshapSpecSelect').value;
+  const datasets = Object.entries(BSHAP_DATA).map(([k,v]) => ({
+    label: v.label,
+    data: v[spec],
+    borderColor: v.color,
+    backgroundColor: v.color + '20',
+    pointBackgroundColor: v.color,
+    pointRadius: 5, pointHoverRadius: 7, tension: 0.3, spanGaps: true,
+    hidden: !visibility.bshap[k],
+  }));
+  chartBshap = new Chart(ctx, {
+    type: 'line',
+    data: { labels: BSHAP_YEARS, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: {
+          reverse: true, min: 1,
+          title: { display: true, text: '아태 순위 (낮을수록 우수)', font:{size:11} },
+          ticks: { stepSize: 2, precision: 0 }
+        },
+        x: { title: { display: true, text: '발표 연도' } }
+      },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.raw ? `${ctx.dataset.label}: 아태 ${ctx.raw}위` : `${ctx.dataset.label}: 미참가/미공개`
+          }
+        }
+      }
+    }
+  });
+}
+
+function updateBshapChart() {
+  if (!chartBshap) return;
+  const spec = document.getElementById('bshapSpecSelect').value;
+  Object.entries(BSHAP_DATA).forEach(([k,v], i) => {
+    chartBshap.data.datasets[i].data = v[spec];
+  });
+  chartBshap.update();
+}
+
+// ── Cost 차트 ──────────────────────────────────────────────
+function initCostChart() {
+  const ctx = document.getElementById('chartCost').getContext('2d');
+  chartCostInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: COST_YEARS,
+      datasets: [{
+        label: 'WBH 로고 비용 (천원)',
+        data: COST_WBH,
+        backgroundColor: '#0057A880',
+        borderColor: '#0057A8',
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 14000, max: 22000,
+          title: { display: true, text: '비용 (천원)' },
+          ticks: { callback: v => v.toLocaleString() }
+        }
+      },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.raw.toLocaleString()}천원`
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Toggle 핸들러 ───────────────────────────────────────────
+function toggleHosp(category, hosp, btn) {
+  visibility[category][hosp] = !visibility[category][hosp];
+  btn.classList.toggle('active');
+
+  if (category === 'wbh' && chartWbh) {
+    const idx = Object.keys(WBH_DATA).indexOf(hosp);
+    if (idx >= 0) {
+      chartWbh.data.datasets[idx].hidden = !visibility[category][hosp];
+      chartWbh.update();
+    }
+  } else if (category === 'bshap' && chartBshap) {
+    const idx = Object.keys(BSHAP_DATA).indexOf(hosp);
+    if (idx >= 0) {
+      chartBshap.data.datasets[idx].hidden = !visibility[category][hosp];
+      chartBshap.update();
+    }
+  }
+}
+
+// ── Tab 전환 ────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+
+  // 차트 초기화 (탭 전환 시)
+  if (name === 'wbh' && !chartWbh) initWbhChart();
+  if (name === 'bshap' && !chartBshap) initBshapChart();
+  if (name === 'cost' && !chartCostInst) initCostChart();
+
+  if (name === 'wbh' && chartWbh) chartWbh.resize();
+  if (name === 'bshap' && chartBshap) chartBshap.resize();
+}
+
+// ── 초기화 ──────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  initWbhChart();
+});
+</script>
+</body>
+</html>
