@@ -7,59 +7,141 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --blue: #0057A8;
-    --blue-light: #3a7fcf;
-    --blue-pale: #e8f1fb;
-    --red: #c0392b;
-    --green: #1a7f4b;
-    --yellow: #f0a500;
-    --gray: #6b7280;
-    --gray-light: #f3f4f6;
-    --border: #e5e7eb;
-    --white: #ffffff;
-    --text: #111827;
-    --text-sub: #6b7280;
+    --ink:       #0d1117;
+    --ink2:      #1c2333;
+    --ink3:      #2d3a52;
+    --gold:      #b89a5a;
+    --gold-lt:   #d4b96e;
+    --gold-pale: #f5edd8;
+    --red:       #c0392b;
+    --green:     #1a6640;
+    --border:    #dde1e9;
+    --surface:   #f7f8fa;
+    --white:     #ffffff;
+    --text:      #0d1117;
+    --sub:       #5a6478;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif; background: #f0f4f9; color: var(--text); font-size: 14px; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', Arial, sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
 
   /* ── Header ── */
-  .header { background: var(--blue); color: white; padding: 20px 32px 16px; }
-  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-  .header p { font-size: 12px; opacity: 0.75; margin-top: 4px; }
+  .header {
+    background: var(--ink);
+    color: white;
+    padding: 24px 40px 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--gold);
+  }
+  .header-left {}
+  .header-eyebrow {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: #fff;
+  }
+  .header-right {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    text-align: right;
+  }
 
   /* ── Tabs ── */
-  .tab-bar { display: flex; background: white; border-bottom: 2px solid var(--border); padding: 0 32px; gap: 2px; }
-  .tab-btn { padding: 14px 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--gray); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
-  .tab-btn:hover { color: var(--blue); }
-  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-bar {
+    display: flex;
+    background: var(--ink2);
+    padding: 0 40px;
+    gap: 0;
+    border-bottom: 1px solid #2a3347;
+  }
+  .tab-btn {
+    padding: 13px 22px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.45);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.8); }
+  .tab-btn.active { color: var(--gold-lt); border-bottom-color: var(--gold); }
 
   /* ── Layout ── */
-  .content { padding: 24px 32px; max-width: 1300px; margin: 0 auto; }
+  .content { padding: 28px 40px; max-width: 1340px; margin: 0 auto; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
   /* ── Cards ── */
-  .card { background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 20px 24px; }
-  .card-title { font-size: 13px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .card-title span { font-size: 16px; }
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 22px 26px;
+  }
+  .card-title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-title-accent {
+    display: inline-block;
+    width: 3px;
+    height: 13px;
+    background: var(--gold);
+    margin-right: 2px;
+    flex-shrink: 0;
+  }
 
   /* ── Grid ── */
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
   .col-full { grid-column: 1 / -1; }
 
   /* ── KPI ── */
-  .kpi-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-  .kpi { flex: 1; min-width: 130px; background: white; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 4px rgba(0,0,0,.08); border-left: 4px solid var(--blue); }
-  .kpi.red { border-left-color: var(--red); }
-  .kpi.green { border-left-color: var(--green); }
-  .kpi.yellow { border-left-color: var(--yellow); }
-  .kpi-label { font-size: 11px; color: var(--text-sub); font-weight: 600; margin-bottom: 4px; }
-  .kpi-value { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
-  .kpi-sub { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
-  .kpi-change { font-size: 12px; font-weight: 700; margin-top: 2px; }
-  .kpi-change.up { color: var(--red); }
+  .kpi-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .kpi {
+    flex: 1; min-width: 130px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--ink3);
+    padding: 16px 18px;
+  }
+  .kpi.red   { border-top-color: var(--red); }
+  .kpi.green { border-top-color: var(--green); }
+  .kpi.gold  { border-top-color: var(--gold); }
+  .kpi.yellow { border-top-color: var(--gold); }
+  .kpi-label { font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--sub); font-weight: 700; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 900; color: var(--text); line-height: 1; letter-spacing: -1px; }
+  .kpi-sub { font-size: 11px; color: var(--sub); margin-top: 5px; }
+  .kpi-change { font-size: 11px; font-weight: 700; margin-top: 3px; }
+  .kpi-change.up   { color: var(--red); }
   .kpi-change.down { color: var(--green); }
 
   /* ── Chart container ── */
@@ -68,83 +150,142 @@
 
   /* ── Table ── */
   .tbl-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: var(--blue-pale); color: var(--blue); font-weight: 700; padding: 8px 12px; text-align: center; border: 1px solid var(--border); white-space: nowrap; }
-  td { padding: 7px 12px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
-  tr:nth-child(even) td { background: #fafbfc; }
-  td.hosp { text-align: left; font-weight: 600; }
-  td.asan { background: #fff3e0 !important; font-weight: 800; color: #c05000; }
-  td.rank1 { background: #fff8e1 !important; font-weight: 800; color: #b8860b; }
-  td.rank2 { background: #f0f8ff !important; color: var(--blue); font-weight: 700; }
-  td.na { color: #ccc; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    background: var(--ink);
+    color: rgba(255,255,255,0.75);
+    font-weight: 700;
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    padding: 9px 12px;
+    text-align: center;
+    white-space: nowrap;
+    border: 1px solid #2a3347;
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+    vertical-align: middle;
+    color: var(--text);
+  }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.hosp { text-align: left; font-weight: 700; color: var(--ink); }
+  td.asan { background: #fdf6e3 !important; font-weight: 800; color: #8a6200; }
+  td.rank1 { background: #fdf6e3 !important; font-weight: 800; color: #8a6200; }
+  td.rank2 { background: #f0f4ff !important; color: #1c3a8a; font-weight: 700; }
+  td.na { color: #d0d5df; }
 
   /* ── Toggle buttons ── */
-  .toggle-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
-  .toggle-label { font-size: 12px; color: var(--text-sub); font-weight: 600; margin-right: 4px; }
-  .toggle-btn { padding: 5px 14px; border-radius: 20px; border: 2px solid; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .toggle-btn.active { color: white; }
-  .toggle-btn[data-hosp="asan"] { border-color: #e65c00; color: #e65c00; }
-  .toggle-btn[data-hosp="asan"].active { background: #e65c00; color: white; }
-  .toggle-btn[data-hosp="samsung"] { border-color: #1428a0; color: #1428a0; }
+  .toggle-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; align-items: center; }
+  .toggle-label { font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--sub); font-weight: 700; margin-right: 4px; }
+  .toggle-btn {
+    padding: 4px 13px;
+    border: 1.5px solid;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+    letter-spacing: 0.2px;
+  }
+  .toggle-btn[data-hosp="asan"]     { border-color: #b86c1a; color: #b86c1a; }
+  .toggle-btn[data-hosp="asan"].active { background: #b86c1a; color: white; }
+  .toggle-btn[data-hosp="samsung"]  { border-color: #1428a0; color: #1428a0; }
   .toggle-btn[data-hosp="samsung"].active { background: #1428a0; color: white; }
-  .toggle-btn[data-hosp="severance"] { border-color: #006b3c; color: #006b3c; }
+  .toggle-btn[data-hosp="severance"]{ border-color: #006b3c; color: #006b3c; }
   .toggle-btn[data-hosp="severance"].active { background: #006b3c; color: white; }
-  .toggle-btn[data-hosp="snuh"] { border-color: #6a0dad; color: #6a0dad; }
-  .toggle-btn[data-hosp="snuh"].active { background: #6a0dad; color: white; }
-  .toggle-btn[data-hosp="gangnam"] { border-color: #2e8b57; color: #2e8b57; }
-  .toggle-btn[data-hosp="gangnam"].active { background: #2e8b57; color: white; }
+  .toggle-btn[data-hosp="snuh"]     { border-color: #5a0da0; color: #5a0da0; }
+  .toggle-btn[data-hosp="snuh"].active { background: #5a0da0; color: white; }
+  .toggle-btn[data-hosp="gangnam"]  { border-color: #2a6b44; color: #2a6b44; }
+  .toggle-btn[data-hosp="gangnam"].active { background: #2a6b44; color: white; }
+
+  /* ── Select ── */
+  select {
+    padding: 4px 10px;
+    border: 1.5px solid var(--border);
+    font-size: 12px;
+    background: white;
+    color: var(--text);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--gold); }
 
   /* ── Notes ── */
-  .notes { margin-top: 10px; }
-  .note-item { background: var(--gray-light); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 12.5px; border-left: 3px solid var(--blue); line-height: 1.6; }
-  .note-item strong { color: var(--blue); }
+  .notes { margin-top: 8px; }
+  .note-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ink3);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  .note-item strong { color: var(--ink); }
   .note-item.warn { border-left-color: var(--red); }
   .note-item.warn strong { color: var(--red); }
   .note-item.good { border-left-color: var(--green); }
   .note-item.good strong { color: var(--green); }
 
-  /* ── Cost table ── */
-  .cost-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
-  .cost-badge.high { background: #fee2e2; color: #b91c1c; }
-  .cost-badge.mid { background: #fef3c7; color: #92400e; }
-  .cost-badge.none { background: #f3f4f6; color: #9ca3af; }
+  /* ── Cost badge ── */
+  .cost-badge { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: 700; border: 1px solid; }
+  .cost-badge.high { background: #fff0f0; color: #a01010; border-color: #f0c0c0; }
+  .cost-badge.mid  { background: #fdf5e0; color: #7a5800; border-color: #e8d090; }
+  .cost-badge.none { background: #f3f4f6; color: #8a93a6; border-color: #d0d5df; }
 
   /* ── Specialty badge ── */
-  .spec { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; margin: 1px; }
-  .spec.s1 { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
-  .spec.s2 { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-  .spec.s3 { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-  .spec.other { background: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
+  .spec { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: 700; border: 1px solid; margin: 1px; }
+  .spec.s1 { background: #fdf5e0; color: #7a5800; border-color: #e8d090; }
+  .spec.s2 { background: #e8f4f0; color: #0c4a30; border-color: #90cob0; }
 
-  /* ── Section heading ── */
-  .section-head { font-size: 15px; font-weight: 800; color: var(--blue); margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
-  .section-head::before { content: ''; display: block; width: 4px; height: 18px; background: var(--blue); border-radius: 2px; }
-
-  /* ── Year badge ── */
-  .year-badge { display: inline-block; padding: 1px 8px; background: var(--blue); color: white; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 6px; }
+  /* ── Section head ── */
+  .section-head {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-head::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 12px;
+    background: var(--gold);
+  }
 
   /* ── Divider ── */
   .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-  /* ── No data ── */
-  .no-data { color: #9ca3af; font-size: 12px; }
-
   /* ── Footnote ── */
-  .footnote { font-size: 11px; color: var(--text-sub); margin-top: 8px; line-height: 1.6; }
+  .footnote { font-size: 11px; color: var(--sub); margin-top: 10px; line-height: 1.65; border-top: 1px solid var(--border); padding-top: 8px; }
 
   /* ── Responsive ── */
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     .grid2, .grid3 { grid-template-columns: 1fr; }
-    .content { padding: 16px; }
-    .tab-bar { padding: 0 12px; overflow-x: auto; }
+    .content { padding: 16px 18px; }
+    .header { padding: 18px 18px 14px; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .tab-bar { padding: 0 10px; overflow-x: auto; }
   }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>📊 뉴스위크 병원 평가 대시보드 — 서울아산병원</h1>
-  <p>Newsweek × Statista | World's Best Hospitals · Asia-Pacific Specialized · World Specialized · 홍보 비용 현황</p>
+  <div class="header-left">
+    <div class="header-eyebrow">Newsweek × Statista — Hospital Rankings</div>
+    <h1>뉴스위크 병원 평가 대시보드 &nbsp;·&nbsp; 서울아산병원</h1>
+  </div>
+  <div class="header-right">
+    World's Best Hospitals &nbsp;·&nbsp; Asia-Pacific Specialized<br>
+    World Specialized &nbsp;·&nbsp; 홍보 비용 현황
+  </div>
 </div>
 
 <div class="tab-bar">
@@ -183,8 +324,8 @@
   </div>
 
   <!-- Chart + Competitor Toggle -->
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-title"><span>📈</span> 세계 종합순위 추이 (낮을수록 우수)</div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title"><span class="card-title-accent"></span> 세계 종합순위 추이 &nbsp;<span style="font-weight:400;color:#aaa;font-size:9px;letter-spacing:0">낮을수록 우수</span></div>
     <div class="toggle-group">
       <span class="toggle-label">병원 표시:</span>
       <button class="toggle-btn active" data-hosp="asan" onclick="toggleHosp('wbh','asan',this)">서울아산병원</button>
@@ -199,7 +340,7 @@
   <div class="grid2">
     <!-- 연도별 데이터 테이블 -->
     <div class="card">
-      <div class="card-title"><span>📋</span> 연도별 순위 상세</div>
+      <div class="card-title"><span class="card-title-accent"></span> 연도별 순위 상세</div>
       <div class="tbl-wrap">
         <table>
           <thead>
@@ -221,7 +362,7 @@
 
     <!-- 주요 변화 & 내용 -->
     <div class="card">
-      <div class="card-title"><span>🔍</span> 주요 변화 · 이슈</div>
+      <div class="card-title"><span class="card-title-accent"></span> 주요 변화 · 이슈</div>
       <div class="notes">
         <div class="note-item warn">
           <strong>⚠ 2026 국내 1위 → 2위 하락</strong><br>
@@ -280,7 +421,7 @@
 
   <!-- 분야 선택 & 차트 -->
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-title"><span>📈</span> 임상분야별 아태 순위 추이 (낮을수록 우수)</div>
+    <div class="card-title"><span class="card-title-accent"></span> 임상분야별 아태 순위 추이 (낮을수록 우수)</div>
     <div class="toggle-group">
       <span class="toggle-label">병원:</span>
       <button class="toggle-btn active" data-hosp="asan" onclick="toggleHosp('bshap','asan',this)">서울아산병원</button>
@@ -310,7 +451,7 @@
 
   <!-- 전체 순위 테이블 -->
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-title"><span>📋</span> 아태 순위 전체 현황 (서울아산병원)</div>
+    <div class="card-title"><span class="card-title-accent"></span> 아태 순위 전체 현황 (서울아산병원)</div>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -347,7 +488,7 @@
 
   <!-- 타 병원 국내 비교 -->
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-title"><span>🏥</span> 국내 주요 병원 아태 순위 비교 (2026)</div>
+    <div class="card-title"><span class="card-title-accent"></span> 국내 주요 병원 아태 순위 비교 (2026)</div>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -372,7 +513,7 @@
 
   <!-- 주요 변화 -->
   <div class="card">
-    <div class="card-title"><span>🔍</span> 주요 변화 · 이슈</div>
+    <div class="card-title"><span class="card-title-accent"></span> 주요 변화 · 이슈</div>
     <div class="notes">
       <div class="note-item good">
         <strong>✅ 2026 심장·내분비·정형·신경·심장수술 아태 1위</strong><br>
@@ -429,7 +570,7 @@
   </div>
 
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-title"><span>📋</span> 세계 임상분야별 순위 현황 (서울아산병원)</div>
+    <div class="card-title"><span class="card-title-accent"></span> 세계 임상분야별 순위 현황 (서울아산병원)</div>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -465,7 +606,7 @@
 
   <div class="grid2">
     <div class="card">
-      <div class="card-title"><span>📅</span> BSH 평가 연혁</div>
+      <div class="card-title"><span class="card-title-accent"></span> BSH 평가 연혁</div>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>연도</th><th>발표</th><th>평가 국가/병원</th><th>주요 내용</th></tr></thead>
@@ -480,7 +621,7 @@
     </div>
 
     <div class="card">
-      <div class="card-title"><span>🔍</span> 주요 변화 · 이슈</div>
+      <div class="card-title"><span class="card-title-accent"></span> 주요 변화 · 이슈</div>
       <div class="notes">
         <div class="note-item good">
           <strong>✅ 2026 세계 TOP10 6개 — 국내 최다</strong><br>
@@ -531,7 +672,7 @@
   <div class="grid2">
     <!-- WBH 비용 -->
     <div class="card">
-      <div class="card-title"><span>💰</span> WBH (세계 종합) 로고 비용 내역</div>
+      <div class="card-title"><span class="card-title-accent"></span> WBH (세계 종합) 로고 비용 내역</div>
       <div class="tbl-wrap">
         <table>
           <thead>
@@ -578,7 +719,7 @@
 
     <!-- BSHAP 비용 -->
     <div class="card">
-      <div class="card-title"><span>💰</span> BSHAP (아태 임상분야별) 로고 비용 내역</div>
+      <div class="card-title"><span class="card-title-accent"></span> BSHAP (아태 임상분야별) 로고 비용 내역</div>
       <div class="tbl-wrap">
         <table>
           <thead>
@@ -618,13 +759,13 @@
 
   <!-- 비용 차트 -->
   <div class="card">
-    <div class="card-title"><span>📊</span> WBH 로고 비용 추이 (천원)</div>
+    <div class="card-title"><span class="card-title-accent"></span> WBH 로고 비용 추이 (천원)</div>
     <div class="chart-wrap"><canvas id="chartCost"></canvas></div>
   </div>
 
   <!-- 할인 구조 -->
   <div class="card" style="margin-top:16px;">
-    <div class="card-title"><span>ℹ️</span> 할인 구조 · 구매 팁</div>
+    <div class="card-title"><span class="card-title-accent"></span> 할인 구조 · 구매 팁</div>
     <div class="notes">
       <div class="note-item good">
         <strong>✅ BSHAP 대량 할인: 5개 이상 구입 시 40% 할인</strong><br>
@@ -849,7 +990,7 @@ function initCostChart() {
         backgroundColor: '#0057A880',
         borderColor: '#0057A8',
         borderWidth: 2,
-        borderRadius: 4,
+        borderRadius: 0,
       }]
     },
     options: {
