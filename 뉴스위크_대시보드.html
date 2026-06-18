@@ -1012,8 +1012,17 @@ function initBshapChart() {
   });
 
   chartBshap = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: BSHAP_SPECS, datasets },
+    type: 'line',
+    data: { labels: BSHAP_SPECS, datasets: datasets.map(d => ({
+      ...d,
+      borderColor: d.backgroundColor.replace('20', ''),
+      backgroundColor: 'transparent',
+      pointBackgroundColor: d.backgroundColor.replace('20', ''),
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      tension: 0.3,
+      spanGaps: true,
+    })) },
     options: {
       responsive: true, maintainAspectRatio: false,
       scales: {
@@ -1022,10 +1031,7 @@ function initBshapChart() {
           title: { display: true, text: '아태 순위 (낮을수록 우수)', font:{size:11} },
           ticks: { stepSize: 2, precision: 0 }
         },
-        x: {
-          title: { display: true, text: '임상분야' },
-          stacked: false
-        }
+        x: { title: { display: true, text: '임상분야' } }
       },
       plugins: {
         legend: { position: 'top' },
@@ -1045,7 +1051,9 @@ function updateBshapChart() {
   const yearIdx = BSHAP_YEARS.indexOf(year);
 
   Object.entries(BSHAP_DATA).forEach(([k,v], i) => {
-    chartBshap.data.datasets[i].data = BSHAP_SPECS.map(spec => v[spec][yearIdx]);
+    const data = BSHAP_SPECS.map(spec => v[spec][yearIdx]);
+    chartBshap.data.datasets[i].data = data;
+    console.log(`Updated ${k}: ${year}`, data);
   });
   chartBshap.update();
 }
