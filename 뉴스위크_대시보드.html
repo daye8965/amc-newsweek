@@ -424,9 +424,9 @@
     <div class="toggle-group">
       <span class="toggle-label">병원:</span>
       <button class="toggle-btn active" data-hosp="asan" onclick="toggleHosp('bshap','asan',this)">서울아산병원</button>
-      <button class="toggle-btn" data-hosp="samsung" onclick="toggleHosp('bshap','samsung',this)">삼성서울병원</button>
-      <button class="toggle-btn" data-hosp="severance" onclick="toggleHosp('bshap','severance',this)">세브란스병원</button>
-      <button class="toggle-btn" data-hosp="snuh" onclick="toggleHosp('bshap','snuh',this)">서울대병원</button>
+      <button class="toggle-btn active" data-hosp="samsung" onclick="toggleHosp('bshap','samsung',this)">삼성서울병원</button>
+      <button class="toggle-btn active" data-hosp="severance" onclick="toggleHosp('bshap','severance',this)">세브란스병원</button>
+      <button class="toggle-btn active" data-hosp="snuh" onclick="toggleHosp('bshap','snuh',this)">서울대병원</button>
     </div>
     <div style="margin-bottom:10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
       <span class="toggle-label">연도 선택:</span>
@@ -939,7 +939,7 @@ const COST_WBH   = [15382,16268,15607,17944,17993,18195,20038];
 // ── 표시 상태 ──────────────────────────────────────────────
 const visibility = {
   wbh:   { asan:true, samsung:false, severance:false, snuh:false },
-  bshap: { asan:true, samsung:false, severance:false, snuh:false },
+  bshap: { asan:true, samsung:true, severance:true, snuh:true },
 };
 
 // ── 차트 인스턴스 ─────────────────────────────────────────
