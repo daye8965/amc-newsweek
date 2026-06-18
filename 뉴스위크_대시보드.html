@@ -998,14 +998,18 @@ function initBshapChart() {
   const year = document.getElementById('bshapYearSelect').value;
   const yearIdx = BSHAP_YEARS.indexOf(year);
 
-  const datasets = Object.entries(BSHAP_DATA).map(([k,v]) => ({
-    label: v.label,
-    data: BSHAP_SPECS.map(spec => v[spec][yearIdx]),
-    backgroundColor: v.color,
-    borderColor: v.color,
-    borderWidth: 1,
-    hidden: !visibility.bshap[k],
-  }));
+  const datasets = Object.entries(BSHAP_DATA).map(([k,v]) => {
+    const data = BSHAP_SPECS.map(spec => v[spec][yearIdx]);
+    console.log(`${k} (${year}):`, data, 'hidden:', !visibility.bshap[k]);
+    return {
+      label: v.label,
+      data: data,
+      backgroundColor: v.color,
+      borderColor: v.color,
+      borderWidth: 1,
+      hidden: !visibility.bshap[k],
+    };
+  });
 
   chartBshap = new Chart(ctx, {
     type: 'bar',
