@@ -236,7 +236,8 @@
   /* ── Specialty badge ── */
   .spec { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: 700; border: 1px solid; margin: 1px; }
   .spec.s1 { background: #fdf5e0; color: #7a5800; border-color: #e8d090; }
-  .spec.s2 { background: #e8f4f0; color: #0c4a30; border-color: #90cob0; }
+  .spec.s2 { background: #e8f4f0; color: #0c4a30; border-color: #90c0b0; }
+  .spec.s3 { background: #eef0f8; color: #2a3a7a; border-color: #a0b0d8; }
 
   /* ── Section head ── */
   .section-head {
@@ -567,38 +568,64 @@
   </div>
 
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-title"><span class="card-title-accent"></span> 세계 임상분야별 순위 현황 (서울아산병원)</div>
+    <div class="card-title"><span class="card-title-accent"></span> 세계 임상분야별 순위 현황 (서울아산병원 + 국내 경쟁병원)</div>
     <div class="tbl-wrap">
       <table>
         <thead>
-          <tr><th>연도</th><th>발표</th><th>심장</th><th>내분비</th><th>암</th><th>신경</th><th>정형</th><th>소화기</th><th>비뇨기</th><th>소아</th><th>호흡기</th><th>비고</th></tr>
+          <tr>
+            <th>연도</th><th>발표</th>
+            <th>내분비</th><th>소화기</th><th>암</th><th>신경</th><th>정형</th><th>심장</th>
+            <th>비뇨기</th><th>호흡기</th><th>소아</th><th>심장수술</th><th>신경수술</th>
+            <th>국내 타병원 1위 분야</th>
+          </tr>
         </thead>
         <tbody>
           <tr>
             <td><strong>2026</strong></td><td>9월</td>
             <td class="rank1">TOP10</td><td class="rank1">TOP10</td><td class="rank1">TOP10</td>
             <td class="rank1">TOP10</td><td class="rank1">TOP10</td><td class="rank1">TOP10</td>
-            <td class="na">-</td><td class="na">-</td><td class="na">-</td>
-            <td><span class="spec s1">국내 최다 6개</span></td>
+            <td class="na">-</td><td class="na">-</td><td class="na">-</td><td class="na">-</td><td class="na">-</td>
+            <td class="na">-</td>
           </tr>
           <tr>
             <td><strong>2025</strong></td><td>9월</td>
-            <td class="na">-</td><td class="rank1">TOP5</td><td class="rank1">TOP5</td>
-            <td class="na">-</td><td class="na">-</td><td class="rank1">TOP5</td>
-            <td class="rank1">TOP5</td><td class="na">-</td><td class="na">-</td>
-            <td><span class="spec s2">글로벌 TOP5 4개</span></td>
+            <td class="rank1">3위</td><td class="rank1">4위</td><td class="rank1">5위</td>
+            <td class="rank1">8위</td><td>12위</td><td>24위</td>
+            <td class="rank1">5위</td><td>25위</td><td>55위</td><td>42위</td><td>110위</td>
+            <td><span class="spec s1">암·호흡기 삼성 1위</span> <span class="spec s2">정형 세브란스 1위</span> <span class="spec s3">소아 서울대 1위</span></td>
+          </tr>
+          <tr>
+            <td><strong>2024</strong></td><td>9월</td>
+            <td class="rank1">3위</td><td class="rank1">5위</td><td class="rank1">6위</td>
+            <td class="rank1">8위</td><td>11위</td><td>33위</td>
+            <td class="rank1">4위</td><td>32위</td><td>65위</td><td>52위</td><td class="na">순위권밖</td>
+            <td><span class="spec s1">암·호흡기 삼성 1위</span> <span class="spec s2">정형 세브란스 1위</span> <span class="spec s3">소아 서울대 1위</span></td>
           </tr>
           <tr>
             <td><strong>2023</strong></td><td>9월</td>
-            <td class="rank1">TOP10</td><td class="rank1">TOP10</td><td class="rank1">TOP10</td>
-            <td class="rank1">TOP10</td><td class="rank1">TOP10</td>
-            <td class="na">-</td><td class="na">-</td><td class="na">-</td><td class="na">-</td>
-            <td><span class="spec s2">5개 세계 10위권</span></td>
+            <td class="rank1">3위</td><td>6위</td><td>7위</td>
+            <td>9위</td><td>12위</td><td>39위</td>
+            <td class="rank1">4위</td><td>26위</td><td>60위</td><td>54위</td><td class="na">순위권밖</td>
+            <td><span class="spec s1">암 삼성 1위</span> <span class="spec s2">정형 세브란스 1위</span> <span class="spec s3">소아 서울대 1위</span></td>
+          </tr>
+          <tr>
+            <td><strong>2022</strong></td><td>9월</td>
+            <td>5위</td><td>8위</td><td>5위</td>
+            <td>8위</td><td>12위</td><td>35위</td>
+            <td class="na">-</td><td>27위</td><td>70위</td><td>52위</td><td class="na">순위권밖</td>
+            <td><span class="spec s2">정형 세브란스 1위</span> <span class="spec s3">소아 서울대 1위</span></td>
+          </tr>
+          <tr>
+            <td><strong>2021</strong></td><td>9·11월</td>
+            <td class="rank1">4위</td><td>6위</td><td>7위</td>
+            <td>8위</td><td>12위</td><td>36위</td>
+            <td class="na">-</td><td class="na">-</td><td class="na">-</td><td class="na">-</td><td class="na">-</td>
+            <td><span class="spec s2">정형 세브란스 1위</span></td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="footnote">※ BSH(세계 임상분야별)는 보도자료 기준 요약 | 정확한 순위 숫자는 각 연도 보고서 HWP 파일 참조 | '-'은 미발표 또는 10위권 외</p>
+    <p class="footnote">※ 서울아산병원 세계 순위 기준 | 국내 타병원 1위 분야: 아산이 국내 2위 이하인 분야에서 1위 병원 표기 | 2026은 보도자료 기준 TOP10 여부만 공개</p>
   </div>
 
   <div class="grid2">
@@ -608,10 +635,12 @@
         <table>
           <thead><tr><th>연도</th><th>발표</th><th>평가 국가/병원</th><th>주요 내용</th></tr></thead>
           <tbody>
-            <tr><td>2026</td><td>9월</td><td>세계 250대</td><td>6개 분야 세계 TOP10 — 국내 최다</td></tr>
-            <tr><td>2025</td><td>9월</td><td>세계 250대</td><td>내분비·소화기·암·비뇨기 글로벌 TOP5</td></tr>
-            <tr><td>2024</td><td>9월</td><td>세계 250대</td><td>HWP 파일 상세 내용 참조</td></tr>
-            <tr><td>2023</td><td>9월</td><td>세계 250대</td><td>5개 분야 세계 10위권</td></tr>
+            <tr><td>2026</td><td>9월</td><td>세계 250대</td><td>6개 분야 세계 TOP10 — 국내 최다 (심장·내분비·암·신경·정형·소화기)</td></tr>
+            <tr><td>2025</td><td>9월</td><td>세계 250대</td><td>내분비 3위·소화기 4위·암 5위·비뇨기 5위·신경 8위·정형 12위 등 12개 분야 평가</td></tr>
+            <tr><td>2024</td><td>9월</td><td>세계 250대</td><td>내분비 3위·비뇨기 4위·소화기 5위·암 6위·신경 8위·정형 11위</td></tr>
+            <tr><td>2023</td><td>9월</td><td>세계 250대</td><td>내분비 3위·비뇨기 4위·소화기 6위·암 7위·신경 9위·정형 12위 — 5개 분야 세계 10위권</td></tr>
+            <tr><td>2022</td><td>9월</td><td>세계 250대</td><td>내분비 5위·암 5위·소화기 8위·신경 8위·정형 12위</td></tr>
+            <tr><td>2021</td><td>9·11월</td><td>세계 250대</td><td>내분비 4위·암 7위·심장 36위 / 소화기 6위·신경 8위·정형 12위 (분리 발표)</td></tr>
           </tbody>
         </table>
       </div>
