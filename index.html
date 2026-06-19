@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>뉴스위크 병원 평가 대시보드 — 서울아산병원</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --ink:       #1e3a5f;
@@ -282,6 +283,7 @@
     <h1>뉴스위크 병원 평가 대시보드 &nbsp;·&nbsp; 서울아산병원</h1>
   </div>
   <div class="header-right">
+    <button onclick="downloadPDF()" style="padding:6px 14px; background:#b89a5a; color:white; border:none; font-size:11px; font-weight:700; cursor:pointer; margin-bottom:6px; border-radius:2px;">📥 PDF 다운로드</button><br>
     World's Best Hospitals &nbsp;·&nbsp; Asia-Pacific Specialized<br>
     World Specialized &nbsp;·&nbsp; 홍보 비용 현황
   </div>
@@ -421,13 +423,6 @@
   <!-- 분야 선택 & 차트 -->
   <div class="card" style="margin-bottom:16px;">
     <div class="card-title"><span class="card-title-accent"></span> 임상분야별 아태 순위 추이 (낮을수록 우수)</div>
-    <div class="toggle-group">
-      <span class="toggle-label">병원:</span>
-      <button class="toggle-btn active" data-hosp="asan" onclick="toggleHosp('bshap','asan',this)">서울아산병원</button>
-      <button class="toggle-btn active" data-hosp="samsung" onclick="toggleHosp('bshap','samsung',this)">삼성서울병원</button>
-      <button class="toggle-btn active" data-hosp="severance" onclick="toggleHosp('bshap','severance',this)">세브란스병원</button>
-      <button class="toggle-btn active" data-hosp="snuh" onclick="toggleHosp('bshap','snuh',this)">서울대병원</button>
-    </div>
     <div style="margin-bottom:10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
       <span class="toggle-label">연도 선택:</span>
       <select id="bshapYearSelect" onchange="updateBshapChart()" style="padding:4px 10px; border-radius:6px; border:1px solid #ccc; font-size:12px;">
@@ -1132,6 +1127,20 @@ function showTab(name) {
 
   if (name === 'wbh' && chartWbh) chartWbh.resize();
   if (name === 'bshap' && chartBshap) chartBshap.resize();
+}
+
+// ── PDF 다운로드 ────────────────────────────────────────────
+function downloadPDF() {
+  const element = document.querySelector('.content');
+  const opt = {
+    margin: 10,
+    filename: `뉴스위크_대시보드_${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+  html2pdf().set(opt).from(element).save();
 }
 
 // ── 초기화 ──────────────────────────────────────────────────
