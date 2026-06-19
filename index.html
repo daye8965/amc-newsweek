@@ -1131,17 +1131,16 @@ function showTab(name) {
 
 // ── PDF 다운로드 ────────────────────────────────────────────
 function downloadPDF() {
-  const activeTab = document.querySelector('.tab-panel.active .content');
-  const tabName = document.querySelector('.tab-btn.active').textContent.trim();
+  const element = document.querySelector('body');
   const opt = {
     margin: 5,
-    filename: `뉴스위크_대시보드_${tabName}_${new Date().toISOString().split('T')[0]}.pdf`,
+    filename: `뉴스위크_대시보드_전체_${new Date().toISOString().split('T')[0]}.pdf`,
     image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 1.5, useCORS: true, logging: false },
+    html2canvas: { scale: 1.2, useCORS: true, logging: false, backgroundColor: '#f7f8fa' },
     jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
-    pagebreak: { mode: 'avoid-all' }
+    pagebreak: { mode: 'css', before: '.tab-panel' }
   };
-  html2pdf().set(opt).from(activeTab).save();
+  html2pdf().set(opt).from(element).save();
 }
 
 // ── 초기화 ──────────────────────────────────────────────────
